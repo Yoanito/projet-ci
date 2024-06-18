@@ -1,0 +1,40 @@
+name: Pipeline TP final
+
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Run tests
+      run: |
+        python test_geometry.py -v
+
+    - name: Install Doxygen
+      run: sudo apt-get install -y doxygen
+
+    - name: Generate doc
+      run: doxygen Doxyfile
+
+    - name: Push doc
+      run: |
+        git config --global user.name 'github-action'
+        git config --global user.email 'github-action@github.com'
+        git add docs
+        git commit -m 'Update Doc'
+        git push origin main
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
